@@ -1,0 +1,23 @@
+Metadata for file: ops_eu28_spp_lin_plusF_6_4sd_archive.csv
+Input data for paper: Drivers of the changing abundance of European birds at two spatial scales
+
+Species time-series derived from national population estimates and national population trends in the Article 12 reporting dataset
+
+
+species: species scientific name following HBW and BirdLife International 2019	
+year:		year
+.id:		Cut-off for the proportion of a species' population to have national trends given in Article 12 reporting for the species level time-series to be estimated. 	
+total_pop:	Deterministic estimate of the number of breeding individuals of a species in the EU in a given year across countries where trend data was available	
+gmean.x:	Mean of bootstrapped estimates of the number of breeding inidivduals of a species in the in the EU in a given year across countries where trend data was available
+med:		Median of bootstrapped estimates of the number of breeding inidivduals of a species in the in the EU in a given year across countries where trend data was available
+lci:		2.5% of bootstrapped estimates of the number of breeding inidivduals of a species in the in the EU in a given year across countries where trend data was available	
+uci:		97.5% of bootstrapped estimates of the number of breeding inidivduals of a species in the in the EU in a given year across countries where trend data was available
+gmean.y:	Total estimated EU breeding population from Article 12 reporting		
+extrap_to:	Extrapolation factor to go from number of birds in the countries with trend estiamtes available to the full EU population	
+total_pop_extrap:	Deterministic estimate of the number of breeding individuals of a species in the EU in a given year extrapolated to total EU population
+gmean.x_extrap:		Mean of bootstrapped estimates of the number of breeding inidivduals of a species in the in the EU in a given year extrapolated to total EU population
+med_extrap:		Median of bootstrapped estimates of the number of breeding inidivduals of a species in the in the EU in a given year extrapolated to total EU population
+lci_extrap:		2.5% of bootstrapped estimates of the number of breeding inidivduals of a species in the in the EU in a given year across extrapolated to total EU population
+uci_extrap:		97.5% of bootstrapped estimates of the number of breeding inidivduals of a species in the in the EU in a given year across extrapolated to total EU population					
+
+HBW and BirdLife International (2019) Handbook of the Birds of the World and BirdLife International digital checklist of the birds of the world. Version 4. Available at: http://datazone.birdlife.org/userfiles/file/Species/Taxonomy/HBW-BirdLife_Checklist_v4_Dec19.zip
