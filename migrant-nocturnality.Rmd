@@ -1,0 +1,118 @@
+---
+title: "Nocturnal migrants visualisation"
+author: "Bart Hoekstra"
+---
+
+```{r}
+library(tidyverse)
+library(auk)
+library(readxl)
+library(ggdark)
+library(ggpie)
+```
+
+```{r}
+data <- read_tsv(file = "data/Life-history characteristics of European birds_Tweaked.txt", 
+                 col_types = cols_only('Species' = col_character(),
+                                       'Facultative migrant' = col_integer(),
+                                       'Short distance migrant' = col_integer(),
+                                       'Long distance migrant' = col_integer())) %>%
+  rename(scientific_name = Species,
+         fc = `Facultative migrant`,
+         sdm = `Short distance migrant`,
+         ldm = `Long distance migrant`) %>%
+  mutate(migratory = fc + sdm + ldm, 
+         common_name = ebird_species(scientific_name, type = "common")) %>%
+  distinct() %>%
+  drop_na()
+```
+
+```{r}
+pops <- read_csv("data/ops_eu28_spp_lin_plusF_6_4sd_archive.csv") %>%
+  select(species, year, total_pop) %>% # Perhaps total_pop_extrap is better?
+  rename(scientific_name = species) %>%
+  group_by(scientific_name) %>%
+  slice_tail(n = 1) %>%
+  ungroup() %>%
+  mutate(scientific_name = recode(scientific_name,
+                                  "Bonasa bonasia" = "Tetrastes bonasia",
+                                  "Calonectris borealis" = "Calonectris diomedea borealis",
+                                  "Catharacta skua" = "Stercorarius skua",
+                                  "Charadrius alexandrinus" = "Anarhynchus alexandrinus",
+                                  "Cyanecula svecica" = "Luscinia svecica",
+                                  "Larus audouinii" = "Ichthyaetus audouinii",
+                                  "Larus genei" = "Chroicocephalus genei",
+                                  "Larus melanocephalus" = "Ichthyaetus melanocephalus",
+                                  "Larus ridibundus" = "Chroicocephalus ridibundus",
+                                  "Leiopicus medius" = "Dendrocoptes medius",
+                                  "Pterodroma deserta" = "Pterodroma feae deserta",
+                                  "Sylvia cantillans" = "Curruca cantillans",
+                                  "Sylvia communis" = "Curruca communis",
+                                  "Sylvia conspicillata" = "Curruca conspicillata",
+                                  "Sylvia crassirostris" = "Curruca crassirostris",
+                                  "Sylvia curruca" = "Curruca curruca",
+                                  "Sylvia hortensis" = "Curruca hortensis",
+                                  "Sylvia melanocephala" = "Curruca melanocephala",
+                                  "Sylvia melanothorax" = "Curruca melanothorax",
+                                  "Sylvia nisoria" = "Curruca nisoria",
+                                  "Sylvia ruppeli" = "Curruca ruppeli",
+                                  "Sylvia sarda" = "Curruca sarda",
+                                  "Sylvia undata" = "Curruca undata"),
+         common_name = ebird_species(scientific_name, type = "common"))
+```
+```{r}
+data %>%
+  left_join(pops, by = "common_name") -> data
+```
+
+
+```{r}
+nocturnality <- read_excel("species_list_nocturnality.xlsx") %>%
+  filter(!(is.na(Nocturnal) & is.na(Both) & is.na(Diurnal)),
+         fc + sdm + ldm > 0) %>%  # Check if species is anyways migratory
+  pivot_longer(cols = Nocturnal:Diurnal, names_to = "migration_type", values_to = "value") %>%
+  mutate(value = replace_na(value, 0)) %>%
+  filter(value == 1) %>%
+  identity()
+
+data %>%
+  left_join(select(nocturnality, migration_type, value, common_name), by = "common_name") %>%
+  drop_na() %>%
+  identity() -> data
+
+n_species <- nrow(data)
+
+data %>%
+  group_by(migration_type) %>%
+  summarise(nr_migrants = round(sum(total_pop, na.rm = TRUE))) %>%
+  ungroup() %>%
+  mutate(prop_migrants = nr_migrants / sum(nr_migrants),
+         count = nr_migrants,
+         migration_type = as.factor(migration_type),
+         migration_type = fct_relevel(migration_type, rev(c("Nocturnal", "Both", "Diurnal")))) -> data2
+
+
+ggdonut(data = data2, group_key = "migration_type", count_type = "count",
+        label_info = c("group", "ratio"), label_type = "horizon", label_pos = "out", label_color = "black",
+        label_gap = 1, nudge_x = 2, nudge_y = 1, donut.label = FALSE, r0 = 2.2, border_color = "NA") +
+  annotate("text", x = 0, y = 0, label = paste0("Species:\n", n_species), color = "black") +
+  scale_fill_manual(values = c("#ffc00f", "#ff580f", "black")) +
+  theme(panel.grid.major = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        legend.position = "none",
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank()) +
+  labs(x = "", y = "")
+
+ggsave("nocturnality.pdf", width = 4, height = 4)
+```
+
+
+
+
+
+
+
+
